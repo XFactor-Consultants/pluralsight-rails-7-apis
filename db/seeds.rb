@@ -14,3 +14,7 @@ post3 = WikiPost.create!(title: 'Do Spiders Dream?', description: 'You dream abo
                          author: 'Phil Brazil')
 post4 = WikiPost.create!(title: 'Penguin Fantasy', description: 'Penguins, penguins everywhere.',
                          author: 'Conlon Nancarrow')
+10000.times do 
+    WikiPost.create!(title: SecureRandom.hex(5), description: 'Test post!',
+                         author: 'Johnny Fakes')
+end 
