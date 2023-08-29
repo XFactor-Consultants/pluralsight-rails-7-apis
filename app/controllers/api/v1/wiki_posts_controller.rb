@@ -1,4 +1,5 @@
 class Api::V1::WikiPostsController < ApplicationController
+    require 'csv'
     skip_before_action :verify_authenticity_token
 
     def index 
@@ -9,7 +10,8 @@ class Api::V1::WikiPostsController < ApplicationController
     def show 
         #render a specific wikipost, found by ID as json 
         @wiki_post = WikiPost.find(params[:id])
-        render json: @wiki_post 
+        serialized = WikiPostSerializer.serialize(@wiki_post)
+        render json: serialized
     end 
 
     def create
@@ -39,6 +41,22 @@ class Api::V1::WikiPostsController < ApplicationController
         @wiki_post = WikiPost.find(params[:id])
         @wiki_post.destroy 
         head :no_content 
+    end 
+
+    def xml_index 
+        @wiki_posts = WikiPost.all 
+        render xml: @wiki_posts 
+    end 
+
+    def csv_index 
+        @wiki_posts = WikiPost.all 
+        csv_data = CSV.generate do |csv| 
+            csv << ["ID", "Title", "Description", "Author"]
+            @wiki_posts.each do |post| 
+                csv << [post.id, post.title, post.description, post.author]
+            end 
+        end 
+        send_data csv_data, filename: "wiki_posts.csv", type: "text/csv"
     end 
 
 
