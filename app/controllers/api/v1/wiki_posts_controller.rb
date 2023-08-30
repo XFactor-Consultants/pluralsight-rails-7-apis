@@ -1,9 +1,16 @@
-class Api::V1::WikiPostsController < ApplicationController
+class Api::V1::WikiPostsController < ActionController::API
+    include ActionController::HttpAuthentication::Token::ControllerMethods
+
     require 'csv'
-    skip_before_action :verify_authenticity_token
+    TOKEN = ENV['WIKI_API_KEY']
+    before_action :authenticate
+
 
     def index 
-        @wiki_posts = WikiPost.all 
+        page = params[:page].to_i
+        limit = params[:limit].to_i 
+        offset = (page - 1) * limit
+        @wiki_posts = WikiPost.limit(limit).offset(offset)
         render json: @wiki_posts 
     end 
 
@@ -66,4 +73,9 @@ class Api::V1::WikiPostsController < ApplicationController
         params.permit(:title, :description, :author)
     end 
 
+    def authenticate
+        authenticate_or_request_with_http_token do |token, options|
+          ActiveSupport::SecurityUtils.secure_compare(token, TOKEN)
+        end
+      end
 end
